@@ -2,18 +2,12 @@ struct Food
   foods::Vector{UInt16}
 end
 
+#=
+  This structure keep track of food.
 
+  A vector for square (Int) of food
 
-function AddFood(foodInfo::Food, x::Int, y::Int)
-
-  push!(foodInfo.foods, x*1000+y)
-end
-
-function foodContain(foodInfo::Food,x::Int)
-  x in foodInfo.foods
-end
-
-
+=#
 
 function initFood(foodInfo::Food,test::Array)
  
@@ -34,6 +28,21 @@ function initFood(test::Array)
 
   fi
 end
+
+function AddFood(foodInfo::Food, x::Int, y::Int)
+
+  push!(foodInfo.foods, x*1000+y)
+end
+
+#= 
+  Check if square contain food
+=#
+function foodContain(foodInfo::Food,square::Int)
+  square in foodInfo.foods
+end
+
+
+
 function isequalFood(a::Food, b::Food)
 
   return a .== b

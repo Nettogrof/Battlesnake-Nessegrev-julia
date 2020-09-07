@@ -6,7 +6,20 @@ mutable struct SnakeInfo
     alive::Bool
 end
 
+#=
+    This structure contain info about a SnakeInfo
+    Body is a vector of square (int)  Body[1] is the head,  body[end] is the getTail
+    Name string of the name of the snake (kind of useless)
+    Eat does the snake have eaten (meaning next turn it will grow)
+    Alive  or death
+=#
 
+
+
+#=
+ Set the body variabl
+
+ =#
 function initBody(bod::Array)
   
     b = Vector{UInt16}()
@@ -23,25 +36,35 @@ function addBody(b::Vector{UInt16}, x::Int ,y::Int)
     push!(b,x*1000 + y)
 end
 
+
+
+#= 
+    Unuseful method 
+=#
 function die(sn::SnakeInfo)
 
     #sn = SnakeInfo(sn.body,sn.name, sn.health,false, false)
     sn.alive= false
 end
 
-function isSnake(sn::SnakeInfo, x::Int)
+#=
+
+    check if the snake is on that square. Use to check if a snake can move on square next turn
+=#
+
+function isSnake(sn::SnakeInfo, square::Int)
    
-    if (sn.eat)
-        if findfirst(isequal(x),sn.body) === nothing
+    if (sn.eat)  #If eat mean the snake will grow
+        if findfirst(isequal(square),sn.body) === nothing
             return false
         else 
           
             return true
           
         end
-    else
+    else   #  Not eat, so a snake can go where the tail is currently
        
-        index = findfirst(isequal(x),sn.body)
+        index = findfirst(isequal(square),sn.body)
       
         if index === nothing
             return false
@@ -53,20 +76,7 @@ function isSnake(sn::SnakeInfo, x::Int)
     end
 end
 
-function getHead(sn::SnakeInfo)
-    sn.body[1]
-end
 
-function getTail(sn::SnakeInfo)
-    sn.body[end]
-end
-
-function setHealth(sn::SnakeInfo, x::Int)
-    if (x == 100)
-        sn.eat = true
-    end
-    sn.health = x
-end
 
 function cloneSnake(sn::SnakeInfo)
     SnakeInfo(sn.body,sn.name,sn.health,sn.eat,sn.alive)

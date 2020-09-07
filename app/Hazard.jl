@@ -2,7 +2,14 @@ struct Hazard
     hazards::Vector{UInt16}
   end
   
-  
+  #=
+  This structure keep track of hazard.
+
+  A vector for square (Int) of hazard
+
+    For BattleRoyale,  but not fully implemented in the code.
+
+=#
   
   function Addhazard(hazardInfo::Hazard, x::Int, y::Int)
   

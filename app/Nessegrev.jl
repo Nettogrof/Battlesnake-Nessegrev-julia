@@ -1,16 +1,34 @@
 using Joseki, HTTP, Dates, Distributed
-addprocs(4)
-include("Food.jl")
 
+
+#=  This is my first project in Julia, please be advise several things may be optimized, 
+    and it probably not as fast as it should be.  I know that Julia should be faster than Java,
+    but currently this implmentation is bit slower than my Java counter-part.
+
+    This implementation use the version 0 board reference: meaning that the top-right square is the "0,0"
+    For reference most of the code use a Int to define a square:  X *1000 + Y    
+    So  Square 0,0 will equals 0  
+        Square 4,7 will equals 4007
+=#
+
+
+addprocs(4)  #Trying to multithread my code,  currently not using it except in benchmark
+
+include("Food.jl")
 include("Hazard.jl")
 include("SnakeInfo.jl")
 include("Node.jl")
 include("Search.jl")
 
-println("nbThreads")
-println(Threads.nthreads())
-global lastRoot = Node()
+global lastRoot = Node() #Trying to keep my search tree from the previous move, but not working so far
 
+#=
+    Receive a Get request at  / 
+    Return info about my battlesnake
+
+    #TODO should be in a config file
+
+=#
 function index(req::HTTP.Request)
     color = "#FFAAAA"
     headType="shac-gamer"
@@ -21,12 +39,23 @@ function index(req::HTTP.Request)
   
 end
 
+
+#=
+    Was a call in early version of BattleSnake
+=#
 function ping(req::HTTP.Request)
     render(Text, "ok")
 end
 
+
+#=
+    This method is for benchmark testing.
+
+    Output the average node by move, total for node in trees, Average time took by move and the longest time took by a move. (to be sure to not by-pass the limit of 500millisecond)
+
+=#
 function test(req::HTTP.Request)
-    nb = 250
+    nb = 250 #Number of move call
 
     total = 0 
     json = body_as_dict(req)
@@ -47,11 +76,16 @@ function test(req::HTTP.Request)
     end
 
     println("Average")
-    println( total / nb / 0.150)
+    println( total / nb / 0.150)  #TODO  Hard-coded time by move, should be move in config file
     dict = Dict("Average" => total / nb / 0.150, "Total" => total, "Millisecond average" => tt / nb, "MaxTime" => maxtime)
     simple_json_responder(req,dict)
 end
 
+
+#=
+
+Old api (version 0) sent a start request to retrieve snake info.  I'm using it for my local developement/testing
+=#
 function start(req::HTTP.Request)
     color = "#FFAAAA"
     headType="shac-gamer"
@@ -61,11 +95,19 @@ function start(req::HTTP.Request)
     simple_json_responder(req,dict)
 end
 
+#=
+Simple fucntion to return a Int of millisecond
+=#
 function getTime()
     t=now()
     return Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
 end
 
+
+#=
+
+Use for benchmarking
+=#
 function bench(json::Dict)
     root = genRoot(json)
    
@@ -347,7 +389,10 @@ function chooseBestMove(root::Node)
 
 end
 
+#=
 
+EndGame - may be use in the future to log info / winner
+=#
 function endGame(req::HTTP.Request)
     simple_json_responder(req,"")
 end
@@ -367,5 +412,5 @@ r = Joseki.router(endpoints)
 
 # Fire up the server
 println("Server up")
-HTTP.serve(r, "0.0.0.0", 8000; verbose=false, reuseaddr=true)
-println("Server up")
+HTTP.serve(r, "0.0.0.0", 8000; verbose=false, reuseaddr=true) #TODO  port number should be in a config file
+
