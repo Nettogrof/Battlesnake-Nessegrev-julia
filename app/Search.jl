@@ -9,6 +9,24 @@ mutable struct Search
 
 end
 
+#=
+    This structure is the main search 
+    cont: Should continue the search
+    Root of the tree search
+
+    height and with of the board
+
+    timeout : time allowed for stopSearching
+    startTime when the search started
+
+=#
+
+
+
+#=
+    Search loop
+    search until timeout reach or root cannot be expanded
+=#
 function run(search::Search)
     while ( getTime() - search.startTime < search.timeout && search.root.exp)
         generateChild(search, getBestChild(search.root))
@@ -16,6 +34,12 @@ function run(search::Search)
     end
 end
 
+
+#=
+    Search spliting for multitreading
+        Not use yet
+
+=#
 function runMulti(search::Search)
    
     t = now()
@@ -41,7 +65,10 @@ function runMulti(search::Search)
     
 end
 
-
+#=
+    Single search in case of multithread.
+    Not use
+=#
 
 function singleChild(search::Search, child::Vector{Node})
     
@@ -58,34 +85,41 @@ function singleChild(search::Search, child::Vector{Node})
 
 end
 
+
+#=
+    Not use  may be deleted in future
+=#
 function stopSearching(search::Search)
     search.cont = false
 end
 
+#=
+    This method generate child of the node
+=#
 
-function generateChild(search::Search, bm::Node)
+function generateChild(search::Search, node::Node)
     
-    if length(bm.child) > 0
-        bm.exp = false
+    if length(node.child) > 0
+        node.exp = false  # If node already have child, means thats the node already have ben expanded  and should not anymore.
     
     else
     
-        current = bm.snakes
-        alphaMove = multi(search, current[1], bm.food, current, bm.hazard)
+        current = node.snakes
+        alphaMove = multi(search, current[1], node.food, current, node.hazard)
     
-        bm.possibleMove = length(alphaMove)
+        node.possibleMove = length(alphaMove)
     
         if length(alphaMove) == 0
-            die(bm.snakes[1])
-            bm.exp = false
-            bm.score[1] = 0
+            die(node.snakes[1])
+            node.exp = false
+            node.score[1] = 0
         else
         
             moves = Vector{Vector{SnakeInfo}}()
             nbSnake = length(current)
             moves = merge(moves, alphaMove)
             @inbounds for i in 2:nbSnake
-                moves = merge(moves, multi(search, current[i], bm.food, current, bm.hazard))
+                moves = merge(moves, multi(search, current[i], node.food, current, node.hazard))
             end
 
             clean(moves)
@@ -94,22 +128,22 @@ function generateChild(search::Search, bm::Node)
             
                 if move[1].alive
                 
-                    addChild(bm, createNode(move, bm.food, bm.hazard))
+                    addChild(node, createNode(move, node.food, node.hazard))
                     stillAlive = true
                 else
                 
-                    node = createNode(move, bm.food, bm.hazard)
+                    node = createNode(move, node.food, node.hazard)
                     node.score[1] = 0
-                    addChild(bm, node)
+                    addChild(node, node)
                 end
 
             
             end
         
             if stillAlive == false
-                die(bm.snakes[1])
-                bm.exp = false
-                bm.score[1] = 0
+                die(node.snakes[1])
+                node.exp = false
+                node.score[1] = 0
             end
 
         end
@@ -118,41 +152,33 @@ function generateChild(search::Search, bm::Node)
     1
 end
 
+#=
+    Generate possible move for a snake
+=#
+
 function multi(search::Search, s::SnakeInfo, f::Food, all::Vector{SnakeInfo}, h::Hazard)
 
     ret = Vector{SnakeInfo}()
 
     if s.alive
-    
-    
         head = s.body[1]
     
         newhead = head
     
         if (head ÷ 1000 > 0) 
-        
             newhead = head - 1000;
-        
-            
-        
             if freeSpace(newhead, all)
             
                 push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
             
             end
-            
-        
-        
         end
     
         if (head ÷ 1000 < search.width - 1) 
-        
             newhead = head + 1000;
             if (freeSpace(newhead, all)) 
                 push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
             end
-            
-        
         end
 
         if (head % 1000 > 0) 
@@ -161,14 +187,10 @@ function multi(search::Search, s::SnakeInfo, f::Food, all::Vector{SnakeInfo}, h:
             if (freeSpace(newhead, all)) 
                 push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
             end
-            
-        
         end
 
         if (head % 1000 < search.height - 1) 
-        
             newhead = head + 1;
-        
             if (freeSpace(newhead, all)) 
                 push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
             end
@@ -179,15 +201,16 @@ function multi(search::Search, s::SnakeInfo, f::Food, all::Vector{SnakeInfo}, h:
     return ret
 end
 
-function freeSpace(x::Int, snakes::Vector{SnakeInfo})
+#=
+    Check if the square is empty
+=#
+function freeSpace(square::Int, snakes::Vector{SnakeInfo})
 
     free = true
     @simd for i in 1:length(snakes)
         if free
-            if isSnake(snakes[i], x)
-            
+            if isSnake(snakes[i], square)
                 free = false
-        
             end
         
         end
@@ -195,6 +218,10 @@ function freeSpace(x::Int, snakes::Vector{SnakeInfo})
 
     return free
 end
+
+#=
+    Clean the moves list by "killing" snake in head-to-head
+=#
 
 function clean(moves::Vector{Vector{SnakeInfo}})
 
@@ -221,10 +248,14 @@ function clean(moves::Vector{Vector{SnakeInfo}})
 
 end
 
+
+#=
+   Merge two list of move
+=#
+
 function merge(list::Vector{Vector{SnakeInfo}}, sn::Vector{SnakeInfo})
 
     if length(sn) == 0
-    
         return list
     else
         ret  = Vector{Vector{SnakeInfo}}()

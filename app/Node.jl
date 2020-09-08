@@ -14,33 +14,41 @@ mutable struct Node
 
 end
 
+#=
+    This structure represent each node of the tree search,  contain food info, hazard info
+    cc is the number of child and sub-child under this node
+    exp :  does this node need to be expand
+    score: vector score for snake   score[1] is the score of this snake
+    possiblemove is howw many possible this snake can do  (max 4 at the start of the game,  usually 3 or less)
+
+=#
+
 function createNode(sn::Vector{SnakeInfo},f::Food, h::Hazard)
    
     newsn = copy(sn)
     
     child = Vector{Node}()
-   # score = Vector{Float16}()
-
-    #@inbounds for i in 1:length(sn)
-     #  push!(score,0)
-    #end
-
-    #score = zeros(length(sn))
     new=Node(f,h,1,newsn,child,true,zeros(Float16,length(sn)),0)
     setScore(new)
     return new
    
 end
 
+
 function addChild(parent::Node, child::Node)
     push!(parent.child, child)
     parent.cc += 1
 end
 
+
+#=
+    Get the child or sub-child with the lowest cc,  so the smaller sub-tree
+
+=#
 function getSmallChild(parent::Node)
     
     if (length(parent.child) == 0)
-        return parent
+        return parent  #return self if no child
     end
    
     updateScore(parent)
@@ -63,22 +71,18 @@ function getSmallChild(parent::Node)
     return getSmallChild(child)
 end
 
-function getScoreRatio(parent::Node)
-    totalOther = sum(parent.score) + 1
-    
-    #@inbounds for c in parent.score
-     #   totalOther += c
-    
-    #end
-    totalOther -= parent.score[1]
 
-    return parent.score[1] / totalOther
+#=
+    Get the score ratio
+    This snake score divide by other snakes score
+=#
+function getScoreRatio(parent::Node)
+    return parent.score[1] / (sum(parent.score) + 1 - parent.score[1])
 end
 
 
 function updateScore(parent::Node)
-  
-   
+     
     if (length(parent.child) > 0 )
        
         if (parent.possibleMove == 1)
@@ -205,6 +209,14 @@ function updateScore(parent::Node)
     nothing
 end
 
+#=
+    Set Score of a leaf node
+    Currently is mostly the score equal the length of the snake + length
+
+    addition score if the only snake alive,  or if the snake is the longest.
+
+=#
+
 function setScore(parent::Node)
    
     @simd  for i in 1:length(parent.snakes)
@@ -234,6 +246,10 @@ function setScore(parent::Node)
    
 end
 
+#=
+    Add score if the longest snake
+=#
+
 function adjustScoreLength(parent::Node)
     maxlength = 0 
     @inbounds for s in parent.snakes
@@ -250,6 +266,11 @@ function adjustScoreLength(parent::Node)
 
 end
 
+#=
+    Return true if both node are equals
+
+        Use in the function to reuse previous search tree
+=#
 function isequalroot(a::Node, b::Node)
     if !isequalFood(a.food, b.food)
         return false
@@ -263,9 +284,14 @@ function isequalroot(a::Node, b::Node)
     return true
 end
 
+
+#=
+    Get the child or sub-child with the best score ratio for this snake
+
+=#
 function getBestChild(root::Node)
     if length(root.child) == 0
-        return root
+        return root  #Return this leaf if no child
     end
     updateScore(root)
     up = Vector{Float16}()
