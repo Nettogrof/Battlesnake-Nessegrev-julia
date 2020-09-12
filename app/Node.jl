@@ -267,13 +267,19 @@ function adjustScoreLength(parent::Node)
 end
 
 function adjustHazards(parent::Node)
+   
     @inbounds for i in 1:length(parent.snakes)
-        if hazardContain(parent.hazard,parent.snakes[i].body[1])
-            parent.score[i] -= 0.5
+        if hazardContain(parent.hazard , parent.snakes[i].body[1] )
+           parent.score[i] -= 0.5
         end
+
+
     end
 
+
 end
+
+  
 
 #=
     Return true if both node are equals

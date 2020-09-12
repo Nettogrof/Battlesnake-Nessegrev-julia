@@ -1,4 +1,4 @@
-struct Hazard
+  struct Hazard
     hazards::Vector{UInt16}
   end
   
@@ -16,12 +16,14 @@ struct Hazard
     push!(hazardInfo.hazards, x*1000+y)
   end
   
-  function hazardContain(hazardInfo::Hazard,x::Int)
-   
+  
+  function hazardContain(hazardInfo::Hazard, x::UInt16)
     x in hazardInfo.hazards
   end
   
-  
+  function hazardContain(hazardInfo::Hazard, x::Int)
+    x in hazardInfo.hazards
+  end
   
   function inithazard(hazardInfo::Hazard,test::Array)
    
