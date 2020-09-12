@@ -241,10 +241,11 @@ function genRoot(json::Dict)
     
    
     fi = initFood(json["board"]["food"])
-   
-   # hi = inithazard(json["board"]["hazard"])
-    h=Vector{UInt16}()
-    hi = Hazard(h)
+    if haskey(json, "hazard")
+        hi = inithazard(json["board"]["hazard"])
+    else
+        hi = Hazard(Vector{UInt16}())
+    end
    
     snakes = Vector{SnakeInfo}()
     

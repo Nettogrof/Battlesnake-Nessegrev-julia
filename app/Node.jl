@@ -226,7 +226,7 @@ function setScore(parent::Node)
     #adjustScoreDsitance
     #adjustBorder
     adjustScoreLength(parent)
-    #adjustHazards
+    adjustHazards(parent)
 
    
     if length(parent.snakes) > 1
@@ -261,6 +261,15 @@ function adjustScoreLength(parent::Node)
     @inbounds for i in 1:length(parent.snakes)
         if (length(parent.snakes[i].body) == maxlength)
             parent.score[i] += 2
+        end
+    end
+
+end
+
+function adjustHazards(parent::Node)
+    @inbounds for i in 1:length(parent.snakes)
+        if hazardContain(parent.hazard,parent.snakes[i].body[1])
+            parent.score[i] -= 0.5
         end
     end
 
