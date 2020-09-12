@@ -34,7 +34,7 @@ function index(req::HTTP.Request)
     headType="shac-gamer"
     tailType="shac-coffee"
     
-   dict = Dict("color" => "#FFAAAA", "head" => "shac-gamer", "tail" => "shac-coffee", "apiversion" => "0")
+   dict = Dict("color" => "#FFAAAA", "head" => "shac-gamer", "tail" => "shac-coffee", "apiversion" => "1")
    simple_json_responder(req,dict)
   
 end
@@ -129,7 +129,10 @@ function move(req::HTTP.Request)
     
    
     json = body_as_dict(req)
-  
+    api1 = false
+    if haskey(json,"head")
+        api1 = true
+    end
     root = genRoot(json)
   
     t=now()
@@ -173,6 +176,13 @@ function move(req::HTTP.Request)
     end
     #directions = ["up", "down", "left", "right"]
     #direction = rand(directions)
+    if api1 
+        if direction == "up"
+            direction = "down"
+        elseif  direction == "down"
+            direction = "up"
+        end
+    end
     
     t=now()
     endtime = Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
@@ -226,6 +236,7 @@ function countTree( child::Node)
     end
     return num
 end
+
 function genRoot(json::Dict)
     
    
