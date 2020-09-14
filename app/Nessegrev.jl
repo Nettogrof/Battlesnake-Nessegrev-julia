@@ -1,4 +1,4 @@
-using Joseki, HTTP, Dates, Distributed
+using Joseki, HTTP, Dates, Distributed, D3Trees
 
 
 #=  This is my first project in Julia, please be advise several things may be optimized, 
@@ -55,7 +55,7 @@ end
 
 =#
 function test(req::HTTP.Request)
-    nb = 250 #Number of move call
+    nb = 150 #Number of move call
 
     total = 0 
     json = body_as_dict(req)
@@ -81,6 +81,27 @@ function test(req::HTTP.Request)
     simple_json_responder(req,dict)
 end
 
+#=
+
+Use for benchmarking
+=#
+function bench(json::Dict)
+    root = genRoot(json)
+   
+    t=now()
+    start = Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
+    search = Search(true,root,json["board"]["height"],json["board"]["width"],10,start)
+    println("Search")
+    
+   runDeeper(search)
+    println(root)
+   println("root.cc")
+    println(root.cc)
+
+  
+    return root.cc
+end
+
 
 #=
 
@@ -104,25 +125,6 @@ function getTime()
 end
 
 
-#=
-
-Use for benchmarking
-=#
-function bench(json::Dict)
-    root = genRoot(json)
-   
-    t=now()
-    start = Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
-    search = Search(true,root,json["board"]["height"],json["board"]["width"],150,start)
-    println("Search")
-  
-   runMulti(search)
-
-    println(root.cc)
-
-  
-    return root.cc
-end
 
 function move(req::HTTP.Request)
     
@@ -410,6 +412,82 @@ function endGame(req::HTTP.Request)
 end
 
 
+function debug(req::HTTP.Request)
+    
+    
+   
+    json = body_as_dict(req)
+    api1 = false
+    if haskey(json,"head")
+        api1 = true
+    end
+    root = genRoot(json)
+  
+    t=now()
+    start = Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
+    search = Search(true,root,json["board"]["height"],json["board"]["width"],10000,start)
+  
+   
+    run(search)
+    
+    println("Root nb child: ")
+    println(length(root.child))
+   
+    winner = chooseBestMove(root)
+    shout = ""
+    if getScoreRatio(winner) < 0.001
+      
+        shout="I lost"
+        winner = lastChance(root)
+        
+    elseif getScoreRatio(winner) > 10
+        shout="I won"
+        #TODO finishHim
+    end
+   
+    move = winner.snakes[1].body[1]
+   
+
+    snakex = json["you"]["body"][1]["x"]
+    snakey = json["you"]["body"][1]["y"]
+  
+    if move ÷ 1000 < snakex
+        
+        direction="left"
+    elseif move ÷ 1000 > snakex
+        
+        direction="right"
+    elseif move % 1000 < snakey
+       
+        direction="up"
+    else
+       
+        direction="down"
+    end
+    #directions = ["up", "down", "left", "right"]
+    #direction = rand(directions)
+    if api1 
+        if direction == "up"
+            direction = "down"
+        elseif  direction == "down"
+            direction = "up"
+        end
+    end
+    
+    t=now()
+    endtime = Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
+    nodecount = root.cc
+    timetotal = endtime-start
+    average = (nodecount/timetotal) * 1000
+    println("count: $nodecount    time: $timetotal    average: $average ")
+    response = Dict("move"=>direction , "shout"=>shout)
+    println(response)
+    lastRoot = root
+    t=D3Tree(root)
+    inbrowser(t,"firefox")
+    simple_json_responder(req,response)
+end
+
 
 endpoints = [
     (index, "GET", "/"),
@@ -418,6 +496,7 @@ endpoints = [
     (move, "POST", "/move"),
     (test, "POST", "/test"),
     (endGame, "POST", "/end"),
+    (debug, "POST", "/debug")
     
 ]
 r = Joseki.router(endpoints)

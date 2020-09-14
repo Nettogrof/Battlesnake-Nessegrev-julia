@@ -29,11 +29,86 @@ end
 =#
 function run(search::Search)
     while ( getTime() - search.startTime < search.timeout && search.root.exp)
+     #   generateChild(search, getSmallChild(search.root))  
         generateChild(search, getBestChild(search.root))
-        generateChild(search, getSmallChild(search.root))    
+          
     end
 end
 
+
+function runDeep(search::Search)
+    while ( getTime() - search.startTime < search.timeout && search.root.exp)
+       # generateChild(search, getSmallChild(search.root))  
+        generateChild(search, getBestChild(generateChild(search, getBestChild(generateChild(search, getBestChild(generateChild(search, getBestChild(search.root))))))))
+          
+    end
+end
+
+
+function runDeeper(search::Search)
+    for w in 1:100
+        generateChild(search, getSmallChild(search.root))
+    end
+    while ( getTime() - search.startTime < search.timeout && search.root.exp)
+        generateChild(search, getSmallChild(search.root)) 
+        node = getBestChild(search.root)
+        for i in 1:5
+            generateChild(search, getBestChild(node))
+         
+            
+        end
+
+        if node.exp
+            for i in 1:5
+                generateChild(search, getBestChild(node))
+                        
+            end
+        end
+
+        if node.exp
+            for i in 1:5
+                generateChild(search, getBestChild(node))
+                        
+            end
+        end
+  
+    end
+
+    #=
+    println(search.root.cc)
+    n=getBestChild(search.root)
+    println(n)
+    println("Generate")
+    m=generateChildDebug(search, n)
+    println(m)
+    println("legh")
+    println(length(n.child))
+    println(length(m.child))
+
+
+    println(n)
+
+
+    
+    println(n.snakes[1].name)
+    for i in 1 : length(n.snakes[1].body)
+    println(n.snakes[1].body[i])
+    end
+    println(n.snakes[2].name)
+    for i in 1 : length(n.snakes[1].body)
+    println(n.snakes[2].body[i])
+    end
+    println(n.snakes[3].name)
+    for i in 1 : length(n.snakes[1].body)
+        println(n.snakes[3].body[i])
+        end
+    println(n.snakes[4].name)
+    for i in 1 : length(n.snakes[1].body)
+        println(n.snakes[4].body[i])
+        end
+=#
+
+end
 
 #=
     Search spliting for multitreading
@@ -149,7 +224,63 @@ function generateChild(search::Search, node::Node)
         end
     end
 
-    1
+end
+
+
+function generateChildDebug(search::Search, node::Node)
+    println("1")
+    if length(node.child) > 0
+        node.exp = false  # If node already have child, means thats the node already have ben expanded  and should not anymore.
+    
+    else
+        println("2")
+        current = node.snakes
+        alphaMove = multi(search, current[1], node.food, current, node.hazard)
+    
+        node.possibleMove = length(alphaMove)
+        println("3 $node.possibleMove")
+        if length(alphaMove) == 0
+            println("die?!")
+            die(node.snakes[1])
+            node.exp = false
+            node.score[1] = 0
+        else
+            println("4")
+            moves = Vector{Vector{SnakeInfo}}()
+            nbSnake = length(current)
+            moves = merge(moves, alphaMove)
+            @inbounds for i in 2:nbSnake
+                moves = merge(moves, multi(search, current[i], node.food, current, node.hazard))
+            end
+            println("5")
+            clean(moves)
+            stillAlive = false
+            @inbounds for move in moves
+            
+                if move[1].alive
+                  
+                    addChild(node, createNode(move, node.food, node.hazard))
+                    stillAlive = true
+                else
+                   
+                    node = createNode(move, node.food, node.hazard)
+                    node.score[1] = 0
+                    addChild(node, node)
+                end
+
+                
+            end
+        
+            if stillAlive == false
+                die(node.snakes[1])
+                node.exp = false
+                node.score[1] = 0
+            end
+
+        end
+    end
+    println(length(node.child))
+    node
 end
 
 #=

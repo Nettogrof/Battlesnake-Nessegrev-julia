@@ -41,6 +41,13 @@ function addChild(parent::Node, child::Node)
 end
 
 
+function addChildDebug(parent::Node, child::Node)
+    println("addchild")
+    push!(parent.child, child)
+    parent.cc += 1
+end
+
+
 #=
     Get the child or sub-child with the lowest cc,  so the smaller sub-tree
 
@@ -305,7 +312,7 @@ end
 
 =#
 function getBestChild(root::Node)
-    if length(root.child) == 0
+    if length(root.child) == 0  || !root.exp
         return root  #Return this leaf if no child
     end
     updateScore(root)
