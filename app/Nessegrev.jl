@@ -1,4 +1,4 @@
-using Joseki, HTTP, Dates, Distributed, D3Trees
+using Joseki, HTTP, Dates, Distributed
 
 
 #=  This is my first project in Julia, please be advise several things may be optimized, 
@@ -124,15 +124,17 @@ function getTime()
     return Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
 end
 
+#=
+One of the main function, this function is called for each move
 
-
+=#
 function move(req::HTTP.Request)
     
     
    
     json = body_as_dict(req)
     api1 = false
-    if haskey(json,"head")
+    if haskey(json,"head")  #Check if the move request contain a head because this is a difference between api version 0 and 1
         api1 = true
     end
     root = genRoot(json)
@@ -147,12 +149,12 @@ function move(req::HTTP.Request)
    
     winner = chooseBestMove(root)
     shout = ""
-    if getScoreRatio(winner) < 0.001
+    if getScoreRatio(root) < 0.001
       
         shout="I lost"
         winner = lastChance(root)
         
-    elseif getScoreRatio(winner) > 10
+    elseif getScoreRatio(root) > 10
         shout="I won"
         #TODO finishHim
     end
@@ -176,8 +178,7 @@ function move(req::HTTP.Request)
        
         direction="down"
     end
-    #directions = ["up", "down", "left", "right"]
-    #direction = rand(directions)
+   
     if api1 
         if direction == "up"
             direction = "down"
@@ -198,27 +199,25 @@ function move(req::HTTP.Request)
     simple_json_responder(req,response)
 end
 
+
+#=
+When the snake think that long move are "lost", it took the longest /  the largest sub-tree .
+=#
 function lastChance(root::Node)
     nb = 0
     ret = root.child[1]
   
     scoreCount = Dict{Int, Int}()
     for c in root.child
-        if haskey(scoreCount,c.snakes[1].body[1])
-          
-            scoreCount[c.snakes[1].body[1]] =  scoreCount[c.snakes[1].body[1]] + c.cc
-            
-        else
-           
+        if haskey(scoreCount,c.snakes[1].body[1])          
+            scoreCount[c.snakes[1].body[1]] =  scoreCount[c.snakes[1].body[1]] + c.cc            
+        else           
             scoreCount[c.snakes[1].body[1]] = c.cc
         end
     end
-    
-   
-    for c in root.child
        
-        if scoreCount[c.snakes[1].body[1]] > nb
-          
+    for c in root.child       
+        if scoreCount[c.snakes[1].body[1]] > nb          
             nb = scoreCount[c.snakes[1].body[1]]
             ret = c 
         end
@@ -239,6 +238,12 @@ function countTree( child::Node)
     return num
 end
 
+
+#=
+    Tihs function translate the moveRequest (Dict)  into the root node for the search
+
+
+=#
 function genRoot(json::Dict)
     
    
@@ -288,7 +293,10 @@ function genRoot(json::Dict)
     
 end
 
+#=
 
+This function is for choosing the best move
+    =#
     
 function chooseBestMove(root::Node)
   
@@ -389,12 +397,12 @@ function chooseBestMove(root::Node)
     end
   
     
-    
     for i in 1:length(root.child)
         c = getScoreRatio(root.child[i])
+       
       
         if c == choiceValue && root.child[i].snakes[1].alive && root.child[i].snakes[1].body[1] == winnermove
-           
+            
             return root.child[i]
         end
     end
@@ -428,19 +436,18 @@ function debug(req::HTTP.Request)
     search = Search(true,root,json["board"]["height"],json["board"]["width"],10000,start)
   
    
-    run(search)
-    
-    println("Root nb child: ")
-    println(length(root.child))
-   
+    runDebug(search)
+    println(getScoreRatio(root))
     winner = chooseBestMove(root)
+    println("ScoreRation")
+    println(getScoreRatio(winner))
     shout = ""
-    if getScoreRatio(winner) < 0.001
+    if getScoreRatio(root) < 0.001
       
         shout="I lost"
         winner = lastChance(root)
         
-    elseif getScoreRatio(winner) > 10
+    elseif getScoreRatio(root) > 10
         shout="I won"
         #TODO finishHim
     end
@@ -483,8 +490,9 @@ function debug(req::HTTP.Request)
     response = Dict("move"=>direction , "shout"=>shout)
     println(response)
     lastRoot = root
-    t=D3Tree(root)
-    inbrowser(t,"firefox")
+
+    println( length(root.child))
+    
     simple_json_responder(req,response)
 end
 
