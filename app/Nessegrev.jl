@@ -141,7 +141,7 @@ function move(req::HTTP.Request)
   
     t=now()
     start = Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
-    search = Search(true,root,json["board"]["height"],json["board"]["width"],200,start)
+    search = Search(true,root,json["board"]["height"],json["board"]["width"],150,start)
   
    
     run(search)
