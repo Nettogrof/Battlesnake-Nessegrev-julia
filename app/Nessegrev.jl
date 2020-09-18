@@ -178,7 +178,7 @@ function move(req::HTTP.Request)
        
         direction="down"
     end
-   
+   #=
     if api1 
         if direction == "up"
             direction = "down"
@@ -186,6 +186,8 @@ function move(req::HTTP.Request)
             direction = "up"
         end
     end
+    =#
+
     
     t=now()
     endtime = Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
