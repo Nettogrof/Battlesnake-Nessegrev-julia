@@ -34,7 +34,7 @@ function index(req::HTTP.Request)
     headType="shac-gamer"
     tailType="shac-coffee"
     
-   dict = Dict("color" => "#FFAAAA", "head" => "shac-gamer", "tail" => "shac-coffee", "apiversion" => "1")
+   dict = Dict("color" => "#FFAAAA", "head" => "shac-gamer", "tail" => "shac-coffee", "apiversion" => "0")
    simple_json_responder(req,dict)
   
 end
@@ -178,7 +178,9 @@ function move(req::HTTP.Request)
        
         direction="down"
     end
-   #=
+   
+
+    #=
     if api1 
         if direction == "up"
             direction = "down"
@@ -188,7 +190,7 @@ function move(req::HTTP.Request)
     end
     =#
 
-    
+
     t=now()
     endtime = Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
     nodecount = root.cc
