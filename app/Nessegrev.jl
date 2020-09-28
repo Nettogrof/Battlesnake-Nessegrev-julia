@@ -1,4 +1,4 @@
-using Joseki, HTTP, Dates, Distributed
+using Joseki, HTTP, Dates, Distributed, ConfParser
 
 
 #=  This is my first project in Julia, please be advise several things may be optimized, 
@@ -30,11 +30,8 @@ global lastRoot = Node() #Trying to keep my search tree from the previous move, 
 
 =#
 function index(req::HTTP.Request)
-    color = "#FFAAAA"
-    headType="shac-gamer"
-    tailType="shac-coffee"
-    
-   dict = Dict("color" => "#FFAAAA", "head" => "shac-gamer", "tail" => "shac-coffee", "apiversion" => "0")
+  
+   dict = Dict("color" => color, "head" => headType, "tail" => tailType, "apiversion" => apiversion)
    simple_json_responder(req,dict)
   
 end
@@ -108,11 +105,9 @@ end
 Old api (version 0) sent a start request to retrieve snake info.  I'm using it for my local developement/testing
 =#
 function start(req::HTTP.Request)
-    color = "#FFAAAA"
-    headType="shac-gamer"
-    tailType="shac-coffee"
+   
     
-    dict = Dict("color" => "#FFAAAA", "headType" => "shac-gamer", "tailType" => "shac-coffee")
+    dict = Dict("color" => color, "headType" => headType, "tailType" => tailType)
     simple_json_responder(req,dict)
 end
 
@@ -141,7 +136,7 @@ function move(req::HTTP.Request)
   
     t=now()
     start = Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
-    search = Search(true,root,json["board"]["height"],json["board"]["width"],150,start)
+    search = Search(true,root,json["board"]["height"],json["board"]["width"],timeout,start)
   
    
     run(search)
@@ -500,6 +495,18 @@ function debug(req::HTTP.Request)
     simple_json_responder(req,response)
 end
 
+conf = ConfParse("snake.conf")
+parse_conf!(conf)
+
+# get and store config parameters
+color     = retrieve(conf, "snake", "color")
+headType = retrieve(conf, "snake", "headType")
+tailType     = retrieve(conf, "snake", "tailType")
+apiversion     = retrieve(conf, "snake", "apiversion")
+
+port = retrieve(conf, "code", "port")
+timeout = retrieve(conf, "code", "timeout")
+
 
 endpoints = [
     (index, "GET", "/"),
@@ -515,5 +522,5 @@ r = Joseki.router(endpoints)
 
 # Fire up the server
 println("Server up")
-HTTP.serve(r, "0.0.0.0", 8000; verbose=false, reuseaddr=true) #TODO  port number should be in a config file
+HTTP.serve(r, "0.0.0.0", port; verbose=false, reuseaddr=true) #TODO  port number should be in a config file
 
