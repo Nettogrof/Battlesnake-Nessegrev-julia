@@ -10,6 +10,7 @@ This is the code used by the snake "Nessegrev-Léa"
  - HTTP,  used to receive http request
  - Dates,  used to calculated time to response before the timeout
  - Distributed,  not used yet, but for testing multi-thread the search
+ - ConfParser, used for the config file
 
 
 ## Getting Started
@@ -21,5 +22,7 @@ This is the code used by the snake "Nessegrev-Léa"
 
 ## Configuration
 
-Currently config are hard-coded. My bad...
+  the file snake.conf is used to adjust some configurations, easy to understand
+
+
 
