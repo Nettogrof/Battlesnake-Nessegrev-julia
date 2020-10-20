@@ -521,5 +521,5 @@ r = Joseki.router(endpoints)
 
 # Fire up the server
 println("Server up")
-HTTP.serve(r, "0.0.0.0", port; verbose=false, reuseaddr=true) 
+HTTP.serve(r, "0.0.0.0", parse(Int64 ,port); verbose=false, reuseaddr=true) 
 
