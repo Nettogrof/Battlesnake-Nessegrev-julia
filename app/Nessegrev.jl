@@ -126,22 +126,23 @@ One of the main function, this function is called for each move
 function move(req::HTTP.Request)
     
     
-   
+  
     json = body_as_dict(req)
     api1 = false
-    if haskey(json,"head")  #Check if the move request contain a head because this is a difference between api version 0 and 1
+    #=if haskey(json,"head")  #Check if the move request contain a head because this is a difference between api version 0 and 1
         api1 = true
-    end
+    end=#
     root = genRoot(json)
   
     t=now()
     start = Dates.hour(t)*60000*60+  Dates.minute(t)*60000 +Dates.second(t)*1000 + Dates.millisecond(t)
-    search = Search(true,root,json["board"]["height"],json["board"]["width"],timeout,start)
+    
+    search = Search(true,root,json["board"]["height"],json["board"]["width"],parse(Int,timeout),start)
   
    
     run(search)
     
-   
+    
     winner = chooseBestMove(root)
     shout = ""
     if getScoreRatio(root) < 0.001
@@ -175,7 +176,6 @@ function move(req::HTTP.Request)
     end
    
 
-    
     if api1 
         if direction == "up"
             direction = "down"
@@ -183,7 +183,6 @@ function move(req::HTTP.Request)
             direction = "up"
         end
     end
-    
 
 
     t=now()
@@ -521,5 +520,5 @@ r = Joseki.router(endpoints)
 
 # Fire up the server
 println("Server up")
-HTTP.serve(r, "0.0.0.0", parse(Int64 ,port); verbose=false, reuseaddr=true) 
+HTTP.serve(r, "0.0.0.0", parse(Int, port); verbose=false, reuseaddr=true) 
 
