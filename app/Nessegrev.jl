@@ -175,7 +175,7 @@ function move(req::HTTP.Request)
     end
    
 
-    #=
+    
     if api1 
         if direction == "up"
             direction = "down"
@@ -183,7 +183,7 @@ function move(req::HTTP.Request)
             direction = "up"
         end
     end
-    =#
+    
 
 
     t=now()
@@ -470,8 +470,7 @@ function debug(req::HTTP.Request)
        
         direction="down"
     end
-    #directions = ["up", "down", "left", "right"]
-    #direction = rand(directions)
+ 
     if api1 
         if direction == "up"
             direction = "down"
@@ -522,5 +521,5 @@ r = Joseki.router(endpoints)
 
 # Fire up the server
 println("Server up")
-HTTP.serve(r, "0.0.0.0", port; verbose=false, reuseaddr=true) #TODO  port number should be in a config file
+HTTP.serve(r, "0.0.0.0", port; verbose=false, reuseaddr=true) 
 
