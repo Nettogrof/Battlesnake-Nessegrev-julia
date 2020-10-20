@@ -132,6 +132,8 @@ function move(req::HTTP.Request)
     if haskey(json,"head")  #Check if the move request contain a head because this is a difference between api version 0 and 1
         api1 = true
     end
+
+    println(api1)
     root = genRoot(json)
   
     t=now()
