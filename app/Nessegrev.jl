@@ -129,7 +129,7 @@ function move(req::HTTP.Request)
   
     json = body_as_dict(req)
     api1 = false
-    if haskey(json,"ruleset")  #Check if the move request contain a head because this is a difference between api version 0 and 1
+    if haskey(json["game"],"ruleset")  #Check if the move request contain a head because this is a difference between api version 0 and 1
         api1 = true
     end
 
