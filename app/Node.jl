@@ -232,9 +232,9 @@ function setScore(parent::Node)
     head = parent.snakes[1].body[1]
     #adjustScoreDsitance
     #adjustBorder
-    adjustScoreLength(parent)
-    adjustHazards(parent)
-
+    #adjustScoreLength(parent)
+    #adjustHazards(parent)
+    adjustGroundControl(parent)
    
     if length(parent.snakes) > 1
         nbAlive  = 0 
@@ -285,6 +285,134 @@ function adjustHazards(parent::Node)
 
 
 end
+
+
+#= 
+add Score based on "Area/ground control"
+
+=#
+function adjustGroundControl(parent::Node)
+    h = gh
+    w = gw
+    board =  zeros(Int16, h, w)
+    
+  
+    for sn in parent.snakes
+        @simd for square in sn.body
+            @inbounds  board[(square ÷ 1000)+1, (square % 1000)+1] = -99
+        end
+    end
+  
+    negboard = deepcopy(board)
+
+    board[ (parent.snakes[1].body[1] ÷ 1000)+1, (parent.snakes[1].body[1] % 1000)+1] = 0
+  
+    floodpos(board, parent.snakes[1].body[1], 15,h,w)
+
+    for i in 2:length(parent.snakes)
+        negboard[(parent.snakes[i].body[1] ÷ 1000)+1 ,(parent.snakes[i].body[1] % 1000)+1] = 0
+        floodneg(negboard, parent.snakes[i].body[1], -15,h,w)
+    end
+   
+       
+     final=  addBoard(board,negboard,h,w)
+
+     cp =0
+     cn =0
+     for i in 1:11
+        for j in 1:11
+            if (final[i,j]>0)
+                cp+=1
+            elseif (final[i,j]<0)
+                cn+=1
+            end
+        end
+    end
+
+    parent.score[1] += ((cp / 50) * 5)  -5 
+    @simd for i in 2:length(parent.snakes)
+        parent.score[i] += ((cn / 50) * 5)  -5 
+    end
+       
+  
+end
+
+function addBoard(pos::Array{Int16,2} , neg::Array{Int16,2}, h::Int64 , w::Int64)
+    board =  zeros(Int16, h, w)
+    @simd for i in eachindex(pos)
+        @inbounds board[i] = pos[i] + neg[i]
+    end
+
+    return board
+end
+
+
+#=
+    Flood positif value on board
+=#
+function floodpos(board::Array{Int16,2}, square::Integer , value::Int64 , h::Int64 , w::Int64)
+   
+
+    if board[(square ÷ 1000)+1, (square % 1000)+1] >= 0 && board[(square ÷ 1000)+1, (square % 1000)+1] < value
+        board[(square ÷ 1000)+1, (square % 1000)+1] = Int16(value)
+        if value > 1
+            value -= 1
+            if (square % 1000 < h - 1 )
+               
+                floodpos(board,UInt16(square+1)  ,value,h,w);
+            end
+
+            if (square ÷ 1000 < w - 1 )
+               
+                floodpos(board,UInt16(square+1000)  ,value,h,w);
+            end
+
+            if (square % 1000 >0 )
+               
+                floodpos(board,UInt16(square-1)  ,value,h,w);
+            end
+
+            if (square ÷ 1000 >0 )
+               
+                floodpos(board,UInt16(square-1000)  ,value,h,w);
+            end
+        end
+    end
+end
+
+
+#=
+    Flood negatif value on board
+=#
+function floodneg(board::Array{Int16,2}, square::Integer , value::Int64 , h::Int64 , w::Int64)
+   
+
+    if  board[(square ÷ 1000)+1, (square % 1000)+1] > value
+        
+        board[(square ÷ 1000)+1, (square % 1000)+1] = Int16(value)
+        if value < -1
+            value += 1
+          
+            if (square % 1000 < h - 1 )
+                floodneg(board,UInt16(square+1)  ,value,h,w);
+            end
+
+            if (square ÷ 1000 < w - 1 )
+                floodneg(board,UInt16(square+1000)  ,value,h,w);
+            end
+
+            if (square % 1000 >0 )
+                floodneg(board,UInt16(square-1)  ,value,h,w);
+            end
+
+            if (square ÷ 1000 >0 )
+                floodneg(board,UInt16(square-1000)  ,value,h,w);
+            end
+        end
+    end
+end
+
+ 
 
   
 
