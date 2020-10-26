@@ -1,4 +1,4 @@
 while true
 do
-	julia Nessegrev.jl
+	julia Nessegrev.jl > snake.log
 done
