@@ -313,7 +313,7 @@ function adjustGroundControl(parent::Node)
     end
     
   
-    final=  addBoard(board,negboard,h,w)
+    final= board + negboard
 
     cp =0
     cn =0
@@ -333,14 +333,6 @@ function adjustGroundControl(parent::Node)
     end
 end
 
-function addBoard(pos::Array{Int16,2} , neg::Array{Int16,2}, h::Int64 , w::Int64)
-    board =  zeros(Int16, h, w)
-    @simd for i in eachindex(pos)
-        @inbounds board[i] = pos[i] + neg[i]
-    end
-
-    return board
-end
 
 
 #=
