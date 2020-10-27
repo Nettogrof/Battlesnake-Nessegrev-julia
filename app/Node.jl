@@ -235,7 +235,9 @@ function setScore(parent::Node)
     #adjustScoreLength(parent)
     #adjustHazards(parent)
     if (length(parent.snakes) < 4)
+        
         adjustGroundControl(parent)
+       
     end
     if length(parent.snakes) > 1
         nbAlive  = 0 
@@ -287,6 +289,7 @@ add Score based on "Area/ground control"
 
 =#
 function adjustGroundControl(parent::Node)
+    
     h = gh
     w = gw
     board =  zeros(Int16, h, w)
@@ -297,19 +300,19 @@ function adjustGroundControl(parent::Node)
             @inbounds  board[(square ÷ 1000)+1, (square % 1000)+1] = -99
         end
     end
-  
+   
     negboard = deepcopy(board)
 
     board[ (parent.snakes[1].body[1] ÷ 1000)+1, (parent.snakes[1].body[1] % 1000)+1] = 0
-  
-    floodpos(board, parent.snakes[1].body[1]÷ 1000, parent.snakes[1].body[1]/ 1000 , length(parent.snakes[1].body),h,w)
-
+    
+    floodpos(board, parent.snakes[1].body[1] ÷ 1000, parent.snakes[1].body[1] % 1000 , length(parent.snakes[1].body),h,w)
+   
     for i in 2:length(parent.snakes)
         negboard[(parent.snakes[i].body[1] ÷ 1000)+1 ,(parent.snakes[i].body[1] % 1000)+1] = 0
         floodneg(negboard, parent.snakes[i].body[1], -(length(parent.snakes[i].body)),h,w)
     end
-   
-       
+    
+  
     final=  addBoard(board,negboard,h,w)
 
     cp =0
@@ -323,7 +326,7 @@ function adjustGroundControl(parent::Node)
               end
           end
     end
-
+    
     parent.score[1] += 2 * (cp / (h + w)) 
     @simd for i in 2:length(parent.snakes)
         parent.score[i] += 2 * (cn / (h+w)) 
@@ -350,23 +353,25 @@ function floodpos(board::Array{Int16,2}, x::Integer, y::Integer , value::Int64 ,
         board[(x)+1, (y)+1] = Int16(value)
         if value > 1
             value -= 1
-            if (y < h - 1 )
-                floodpos(board,x,y+1  ,value,h,w);
+            if (y < h - 2 )
+                floodpos(board, x , y +1 ,value,h,w);
             end
 
-            if (x < w - 1 )
-                floodpos(board,x+1,y  ,value,h,w);
+            if (x < w - 2 )
+                floodpos(board, x + 1 ,y  ,value,h,w);
             end
 
-            if (square % 1000 >0 )
-                floodpos(board,x,y-1  ,value,h,w);
+            if (y >0 )
+                floodpos(board, x , y - 1  ,value,h,w);
             end
 
             if (x >0 )
-                floodpos(board,x-1,y  ,value,h,w);
+                floodpos(board , x - 1,y  ,value,h,w);
             end
         end
     end
+
+  
 end
 
 
