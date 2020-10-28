@@ -309,7 +309,7 @@ function adjustGroundControl(parent::Node)
    
     for i in 2:length(parent.snakes)
         negboard[(parent.snakes[i].body[1] ÷ 1000)+1 ,(parent.snakes[i].body[1] % 1000)+1] = 0
-        floodneg(negboard, parent.snakes[i].body[1], -(length(parent.snakes[i].body)),h,w)
+        floodneg(negboard, parent.snakes[i].body[1] ÷ 1000, parent.snakes[i].body[1] % 1000  , -(length(parent.snakes[i].body)),h,w)
     end
     
   
@@ -370,27 +370,27 @@ end
 #=
     Flood negatif value on board
 =#
-function floodneg(board::Array{Int16,2}, square::Integer , value::Int64 , h::Int64 , w::Int64)
+function floodneg(board::Array{Int16,2},  x::Integer, y::Integer  , value::Int64 , h::Int64 , w::Int64)
 
-    if  board[(square ÷ 1000)+1, (square % 1000)+1] > value
-        board[(square ÷ 1000)+1, (square % 1000)+1] = Int16(value)
+    if  board[(x)+1, (y)+1] > value
+        board[(x)+1, (y)+1] = Int16(value)
         if value < -1
             value += 1
           
-            if (square % 1000 < h - 1 )
-                floodneg(board,square+1  ,value,h,w);
+            if (y < h - 1 )
+                floodneg(board,x,y+1  ,value,h,w);
             end
 
-            if (square ÷ 1000 < w - 1 )
-                floodneg(board,square+1000  ,value,h,w);
+            if (x < w - 1 )
+                floodneg(board,x+1,y  ,value,h,w);
             end
 
-            if (square % 1000 >0 )
-                floodneg(board,square-1  ,value,h,w);
+            if (y >0 )
+                floodneg(board,x,y-1  ,value,h,w);
             end
 
-            if (square ÷ 1000 >0 )
-                floodneg(board,square-1000  ,value,h,w);
+            if (x >0 )
+                floodneg(board,x-1,y  ,value,h,w);
             end
         end
     end
