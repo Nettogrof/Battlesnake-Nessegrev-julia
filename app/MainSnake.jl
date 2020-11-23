@@ -11,7 +11,7 @@ global width
 =#
 function index(req::HTTP.Request)
   
-   dict = Dict("color" => color, "head" => headType, "tail" => tailType, "apiversion" => apiversion)
+   dict = Dict("color" => color, "head" => headType, "tail" => tailType, "apiversion" => apiversion, "version" => version)
    simple_json_responder(req,dict)
   
 end
@@ -484,6 +484,7 @@ color     = retrieve(conf, "snake", "color")
 headType = retrieve(conf, "snake", "headType")
 tailType     = retrieve(conf, "snake", "tailType")
 apiversion     = retrieve(conf, "snake", "apiversion")
+version = retrieve(conf,"snake","version")
 
 port = retrieve(conf, "code", "port")
 timeout = retrieve(conf, "code", "timeout")
