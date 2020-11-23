@@ -225,33 +225,39 @@ end
 =#
 
 function setScore(parent::Node)
-   
-    @simd  for i in 1:length(parent.snakes)
-        @inbounds parent.score[i] = parent.snakes[i].alive ? length(parent.snakes[i].body) + parent.snakes[i].health / 50  : 0
-    end
-    head = parent.snakes[1].body[1]
-    #adjustScoreDsitance
-    #adjustBorder
-    #adjustScoreLength(parent)
-    #adjustHazards(parent)
-    if (length(parent.snakes) < 4)
+    if (false)
+        @simd  for i in 1:length(parent.snakes)
+            @inbounds parent.score[i] = parent.snakes[i].alive ? length(parent.snakes[i].body) + parent.snakes[i].health / 50  : 0
+        end
+        head = parent.snakes[1].body[1]
+        #adjustScoreDsitance
+        #adjustBorder
+        #adjustScoreLength(parent)
+        #adjustHazards(parent)
+        if (length(parent.snakes) < 4)
+            
+            adjustGroundControl(parent)
         
-        adjustGroundControl(parent)
-       
-    end
-    if length(parent.snakes) > 1
-        nbAlive  = 0 
-        for i in 1 : length(parent.snakes)
-            if (parent.snakes[i].alive)
-                nbAlive += 1
+        end
+        if length(parent.snakes) > 1
+            nbAlive  = 0 
+            for i in 1 : length(parent.snakes)
+                if (parent.snakes[i].alive)
+                    nbAlive += 1
+                end
             end
-        end
 
-        if (nbAlive < 2)
-            parent.exp = false
+            if (nbAlive < 2)
+                parent.exp = false
+            end
+        elseif length(parent.snakes) == 1
+            parent.score[1] += 1000
         end
-    elseif length(parent.snakes) == 1
-        parent.score[1] += 1000
+    else  #snack-a-tron
+        @simd  for i in 1:length(parent.snakes)
+            @inbounds parent.score[i] = 0
+        end
+        adjustGroundControl(parent)
     end
 end
 
@@ -305,11 +311,11 @@ function adjustGroundControl(parent::Node)
 
     board[ (parent.snakes[1].body[1] ÷ 1000)+1, (parent.snakes[1].body[1] % 1000)+1] = 0
     
-    floodpos(board, parent.snakes[1].body[1] ÷ 1000, parent.snakes[1].body[1] % 1000 , length(parent.snakes[1].body),h,w)
+    floodpos(board, parent.snakes[1].body[1] ÷ 1000, parent.snakes[1].body[1] % 1000 , 40,h,w)
    
     for i in 2:length(parent.snakes)
         negboard[(parent.snakes[i].body[1] ÷ 1000)+1 ,(parent.snakes[i].body[1] % 1000)+1] = 0
-        floodneg(negboard, parent.snakes[i].body[1] ÷ 1000, parent.snakes[i].body[1] % 1000  , -(length(parent.snakes[i].body)),h,w)
+        floodneg(negboard, parent.snakes[i].body[1] ÷ 1000, parent.snakes[i].body[1] % 1000  , -40,h,w)
     end
     
   
