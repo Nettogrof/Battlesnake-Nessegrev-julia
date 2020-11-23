@@ -234,15 +234,16 @@ function multi(search::Search, s::SnakeInfo, f::Food, all::Vector{SnakeInfo}, h:
             newhead = head - 1000;
             if freeSpace(newhead, all)
             
-                push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
-            
+               # push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
+               push!(ret, createNewSnake(s, newhead, true, false))
             end
         end
     
         if (head ÷ 1000 < search.width - 1) 
             newhead = head + 1000;
             if (freeSpace(newhead, all)) 
-                push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
+                 # push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
+               push!(ret, createNewSnake(s, newhead, true, false))
             end
         end
 
@@ -250,14 +251,16 @@ function multi(search::Search, s::SnakeInfo, f::Food, all::Vector{SnakeInfo}, h:
         
             newhead = head - 1;
             if (freeSpace(newhead, all)) 
-                push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
+                # push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
+                push!(ret, createNewSnake(s, newhead, true, false))
             end
         end
 
         if (head % 1000 < search.height - 1) 
             newhead = head + 1;
             if (freeSpace(newhead, all)) 
-                push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
+                 # push!(ret, createNewSnake(s, newhead, foodContain(f, newhead), hazardContain(h, newhead)))
+               push!(ret, createNewSnake(s, newhead, true, false))
             end
         
         end            

@@ -225,7 +225,7 @@ end
 =#
 
 function setScore(parent::Node)
-    if (false)
+   #= if (false)
         @simd  for i in 1:length(parent.snakes)
             @inbounds parent.score[i] = parent.snakes[i].alive ? length(parent.snakes[i].body) + parent.snakes[i].health / 50  : 0
         end
@@ -253,12 +253,26 @@ function setScore(parent::Node)
         elseif length(parent.snakes) == 1
             parent.score[1] += 1000
         end
-    else  #snack-a-tron
+    else=#  #snack-a-tron
         @simd  for i in 1:length(parent.snakes)
             @inbounds parent.score[i] = 0
         end
         adjustGroundControl(parent)
-    end
+        if length(parent.snakes) > 1
+            nbAlive  = 0 
+            for i in 1 : length(parent.snakes)
+                if (parent.snakes[i].alive)
+                    nbAlive += 1
+                end
+            end
+
+            if (nbAlive < 2)
+                parent.exp = false
+            end
+        elseif length(parent.snakes) == 1
+            parent.score[1] += 1000
+        end
+   
 end
 
 #=
@@ -295,9 +309,10 @@ add Score based on "Area/ground control"
 
 =#
 function adjustGroundControl(parent::Node)
-    
-    h = gh
-    w = gw
+   
+    h = 19
+    w = 19
+   
     board =  zeros(Int16, h, w)
     
   
@@ -306,18 +321,18 @@ function adjustGroundControl(parent::Node)
             @inbounds  board[(square ÷ 1000)+1, (square % 1000)+1] = -99
         end
     end
-   
+  
     negboard = deepcopy(board)
 
     board[ (parent.snakes[1].body[1] ÷ 1000)+1, (parent.snakes[1].body[1] % 1000)+1] = 0
     
     floodpos(board, parent.snakes[1].body[1] ÷ 1000, parent.snakes[1].body[1] % 1000 , 40,h,w)
-   
+    
     for i in 2:length(parent.snakes)
         negboard[(parent.snakes[i].body[1] ÷ 1000)+1 ,(parent.snakes[i].body[1] % 1000)+1] = 0
         floodneg(negboard, parent.snakes[i].body[1] ÷ 1000, parent.snakes[i].body[1] % 1000  , -40,h,w)
     end
-    
+   
   
     final= board + negboard
 
@@ -332,11 +347,12 @@ function adjustGroundControl(parent::Node)
               end
           end
     end
-    
+   
     parent.score[1] += 2 * (cp / (h + w)) 
     @simd for i in 2:length(parent.snakes)
         parent.score[i] += 2 * (cn / (h+w)) 
     end
+    
 end
 
 
