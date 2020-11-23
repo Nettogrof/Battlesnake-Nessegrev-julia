@@ -28,16 +28,13 @@ end
     search until timeout reach or root cannot be expanded
 =#
 function run(search::Search)
-    for w in 1:200
+    for w in 1:50
         generateChild(search, getSmallChild(search.root))
     end
     while ( getTime() - search.startTime < search.timeout && search.root.exp)
         generateChild(search, getSmallChild(search.root)) 
         node = getBestChild(search.root)
-        for i in 1:4
-            generateChild(search, getBestChild(node))
-                   
-        end
+       
  
     end
 end
