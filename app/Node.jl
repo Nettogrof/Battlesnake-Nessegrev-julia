@@ -326,11 +326,11 @@ function adjustGroundControl(parent::Node)
 
     board[ (parent.snakes[1].body[1] ÷ 1000)+1, (parent.snakes[1].body[1] % 1000)+1] = 0
     
-    floodpos(board, parent.snakes[1].body[1] ÷ 1000, parent.snakes[1].body[1] % 1000 , 40,h,w)
+    floodpos(board, parent.snakes[1].body[1] ÷ 1000, parent.snakes[1].body[1] % 1000 , 60,h,w)
     
     for i in 2:length(parent.snakes)
         negboard[(parent.snakes[i].body[1] ÷ 1000)+1 ,(parent.snakes[i].body[1] % 1000)+1] = 0
-        floodneg(negboard, parent.snakes[i].body[1] ÷ 1000, parent.snakes[i].body[1] % 1000  , -40,h,w)
+        floodneg(negboard, parent.snakes[i].body[1] ÷ 1000, parent.snakes[i].body[1] % 1000  , -60,h,w)
     end
    
   
