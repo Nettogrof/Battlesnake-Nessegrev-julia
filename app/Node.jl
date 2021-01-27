@@ -368,19 +368,137 @@ function floodpos(board::Array{Int16,2}, x::Integer, y::Integer , value::Int64 ,
         if value > 1
             value -= 1
             if (y < h - 2 )
-                floodpos(board, x , y +1 ,value,h,w);
+                floodnorthpos(board, x , y +1 ,value,h,w);
             end
 
             if (x < w - 2 )
-                floodpos(board, x + 1 ,y  ,value,h,w);
+                floodeastpos(board, x + 1 ,y  ,value,h,w);
             end
 
             if (y >0 )
-                floodpos(board, x , y - 1  ,value,h,w);
+                floodsouthpos(board, x , y - 1  ,value,h,w);
             end
 
             if (x >0 )
-                floodpos(board , x - 1,y  ,value,h,w);
+                floodwestpos(board , x - 1,y  ,value,h,w);
+            end
+        end
+    end
+
+  
+end
+
+
+
+#=
+    Flood north positif value on board
+=#
+function floodnorthpos(board::Array{Int16,2}, x::Integer, y::Integer , value::Int64 , h::Int64 , w::Int64)
+   
+
+    if board[(x)+1, (y)+1] >= 0 && board[(x)+1, (y)+1] < value
+        board[(x)+1, (y)+1] = Int16(value)
+        if value > 1
+            value -= 1
+            if (y < h - 2 )
+                floodnorthpos(board, x , y +1 ,value,h,w);
+            end
+
+            if (x < w - 2 )
+                floodeastpos(board, x + 1 ,y  ,value,h,w);
+            end
+
+            if (x >0 )
+                floodwestpos(board , x - 1,y  ,value,h,w);
+            end
+        end
+    end
+
+  
+end
+
+
+#=
+    Flood south positif value on board
+=#
+function floodsouthpos(board::Array{Int16,2}, x::Integer, y::Integer , value::Int64 , h::Int64 , w::Int64)
+   
+
+    if board[(x)+1, (y)+1] >= 0 && board[(x)+1, (y)+1] < value
+        board[(x)+1, (y)+1] = Int16(value)
+        if value > 1
+            value -= 1
+           
+            if (x < w - 2 )
+                floodeastpos(board, x + 1 ,y  ,value,h,w);
+            end
+
+            if (y >0 )
+                floodsouthpos(board, x , y - 1  ,value,h,w);
+            end
+
+            if (x >0 )
+                floodwestpos(board , x - 1,y  ,value,h,w);
+            end
+        end
+    end
+
+  
+end
+
+
+
+#=
+    Flood east positif value on board
+=#
+function floodeastpos(board::Array{Int16,2}, x::Integer, y::Integer , value::Int64 , h::Int64 , w::Int64)
+   
+
+    if board[(x)+1, (y)+1] >= 0 && board[(x)+1, (y)+1] < value
+        board[(x)+1, (y)+1] = Int16(value)
+        if value > 1
+            value -= 1
+            if (y < h - 2 )
+                floodnorthpos(board, x , y +1 ,value,h,w);
+            end
+
+            if (x < w - 2 )
+                floodeastpos(board, x + 1 ,y  ,value,h,w);
+            end
+
+            if (y >0 )
+                floodsouthpos(board, x , y - 1  ,value,h,w);
+            end
+
+            
+        end
+    end
+
+  
+end
+
+
+
+#=
+    Flood west positif value on board
+=#
+function floodwestpos(board::Array{Int16,2}, x::Integer, y::Integer , value::Int64 , h::Int64 , w::Int64)
+   
+
+    if board[(x)+1, (y)+1] >= 0 && board[(x)+1, (y)+1] < value
+        board[(x)+1, (y)+1] = Int16(value)
+        if value > 1
+            value -= 1
+            if (y < h - 2 )
+                floodnorthpos(board, x , y +1 ,value,h,w);
+            end
+
+            if (y >0 )
+                floodsouthpos(board, x , y - 1  ,value,h,w);
+            end
+
+            if (x >0 )
+                floodwestpos(board , x - 1,y  ,value,h,w);
             end
         end
     end
@@ -400,28 +518,138 @@ function floodneg(board::Array{Int16,2},  x::Integer, y::Integer  , value::Int64
             value += 1
           
             if (y < h - 1 )
-                floodneg(board,x,y+1  ,value,h,w);
+                floodnegnorth(board,x,y+1  ,value,h,w);
             end
 
             if (x < w - 1 )
-                floodneg(board,x+1,y  ,value,h,w);
+                floodnegeast(board,x+1,y  ,value,h,w);
             end
 
             if (y >0 )
-                floodneg(board,x,y-1  ,value,h,w);
+                floodnegsouth(board,x,y-1  ,value,h,w);
             end
 
             if (x >0 )
-                floodneg(board,x-1,y  ,value,h,w);
+                floodnegwest(board,x-1,y  ,value,h,w);
             end
         end
     end
 end
 
  
+#=
+    Flood negatif value on board
+=#
+function floodnegnorth(board::Array{Int16,2},  x::Integer, y::Integer  , value::Int64 , h::Int64 , w::Int64)
 
+    if  board[(x)+1, (y)+1] > value
+        board[(x)+1, (y)+1] = Int16(value)
+        if value < -1
+            value += 1
+          
+            
+            if (y < h - 1 )
+                floodnegnorth(board,x,y+1  ,value,h,w);
+            end
+
+            if (x < w - 1 )
+                floodnegeast(board,x+1,y  ,value,h,w);
+            end
+
+           
+
+            if (x >0 )
+                floodnegwest(board,x-1,y  ,value,h,w);
+            end
+        end
+    end
+end
+
+
+#=
+    Flood negatif value on board
+=#
+function floodnegsouth(board::Array{Int16,2},  x::Integer, y::Integer  , value::Int64 , h::Int64 , w::Int64)
+
+    if  board[(x)+1, (y)+1] > value
+        board[(x)+1, (y)+1] = Int16(value)
+        if value < -1
+            value += 1
+          
+           
+           
+
+            if (x < w - 1 )
+                floodnegeast(board,x+1,y  ,value,h,w);
+            end
+
+            if (y >0 )
+                floodnegsouth(board,x,y-1  ,value,h,w);
+            end
+
+            if (x >0 )
+                floodnegwest(board,x-1,y  ,value,h,w);
+            end
+        end
+    end
+end
   
+#=
+    Flood negatif value on board
+=#
+function floodnegwest(board::Array{Int16,2},  x::Integer, y::Integer  , value::Int64 , h::Int64 , w::Int64)
 
+    if  board[(x)+1, (y)+1] > value
+        board[(x)+1, (y)+1] = Int16(value)
+        if value < -1
+            value += 1
+          
+           
+            if (y < h - 1 )
+                floodnegnorth(board,x,y+1  ,value,h,w);
+            end
+
+           
+            if (x >0 )
+                floodnegwest(board,x-1,y  ,value,h,w);
+            end
+
+            if (y >0 )
+                floodnegsouth(board,x,y-1  ,value,h,w);
+            end
+
+            
+        end
+    end
+end
+
+#=
+    Flood negatif value on board
+=#
+function floodnegeast(board::Array{Int16,2},  x::Integer, y::Integer  , value::Int64 , h::Int64 , w::Int64)
+
+    if  board[(x)+1, (y)+1] > value
+        board[(x)+1, (y)+1] = Int16(value)
+        if value < -1
+            value += 1
+          
+           
+            if (y < h - 1 )
+                floodnegnorth(board,x,y+1  ,value,h,w);
+            end
+
+            if (x < w - 1 )
+                floodnegeast(board,x+1,y  ,value,h,w);
+            end
+
+            if (y >0 )
+                floodnegsouth(board,x,y-1  ,value,h,w);
+            end
+
+            
+        end
+    end
+end
 #=
     Return true if both node are equals
 
